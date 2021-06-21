@@ -84,53 +84,92 @@ int main() {
 }
 
 void hexToDec() {
-   bool hexToDecExit = false;
+   //variable declarations
+   bool hexToDecExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
+
    do {
-      cout << "\n" << "input Hexadecimal number or \"EXIT\" to return to menu: ";
+      cout << "\n" << "input Hexadecimal number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
+
+      // force uppercase for easier string parsing
       for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
          inputCheck[i] = toupper(inputCheck[i]);      // way to do this but it works
       }
-      if (inputCheck.compare(exitString) == 0) {
+
+      if (inputCheck.compare(exitString) == 0) { // check exit case
          return;
       }
-      
+
+      // validate input string
+      for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
+         if ((*rit >= '0' && *rit <= '9') || (*rit >= 'A' && *rit <= 'F')) {
+            cout << "good" << endl;
+         }
+         else if (*rit == 'X') { // cases where 0x was added front of hexdecimal number, just parses it off
+            cout << "X found" << endl;
+            break;
+         }
+         else {
+            cerr << "Invalid input: hexdecimal is 0-9 and A-F" << endl;
+            cin.clear();
+            break;
+         }
+      }
       cout << inputCheck << endl;
    } while (hexToDecExit != true);
-   
-   
 }
 
 void binToDec() {
-   bool binToDecExit = false;
+   bool binToDecExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
+
    do {
-      cout << "\n" << "input Binary number: ";
+      cout << "\n" << "input Binary number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
+
+      // force uppercase for easier string parsing
       for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
          inputCheck[i] = toupper(inputCheck[i]);      // way to do this but it works
       }
-      if (inputCheck.compare(exitString) == 0) {
+
+      if (inputCheck.compare(exitString) == 0) { // check exit case
          return;
       }
-      cout << inputCheck << endl;
+
+      // validate input string
+      for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
+         if (*rit == '1' || *rit == '0') {
+            cout << "good" << endl;
+         }
+         else {
+            cerr << "Invalid input: binary is 0 or 1 only" << endl;
+            cin.clear();
+
+         }
+      }
+
    } while (binToDecExit != true);
 }
 
 void decToHex() {
-   bool decToHexExit = false;
+   // variable declarations
+   bool decToHexExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
+
    do {
-      cout << "\n" << "input Decimal number: ";
+      cout << "\n" << "input Decimal number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
+
+      // force uppercase for easier string parsing
       for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
          inputCheck[i] = toupper(inputCheck[i]);      // way to do this but it works
       }
-      if (inputCheck.compare(exitString) == 0) {
+
+      if (inputCheck.compare(exitString) == 0) { // check exit case
          return;
       }
       cout << inputCheck << endl;
@@ -138,16 +177,21 @@ void decToHex() {
 }
 
 void decToBin() {
-   bool decToBinExit = false;
+   //variable declarations
+   bool decToBinExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
+
    do {
-      cout << "\n" << "input Decimal number: ";
+      cout << "\n" << "input Decimal number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
+
+      // force uppercase for easier string parsing
       for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
          inputCheck[i] = toupper(inputCheck[i]);      // way to do this but it works
       }
-      if (inputCheck.compare(exitString) == 0) {
+
+      if (inputCheck.compare(exitString) == 0) { // check exit case
          return;
       }
       cout << inputCheck << endl;
