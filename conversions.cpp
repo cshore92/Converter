@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 int main() {
@@ -32,6 +33,9 @@ int main() {
 
    string input = ""; // holds input from user
    bool mainExit = false; // flag for ending the program
+
+   // index table for hex values
+   int hexInts[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
    do {
       // Display options
@@ -85,6 +89,8 @@ int main() {
 
 void hexToDec() {
    //variable declarations
+   vector<char> hexVec; // maybe change to dynamic to allow mutiple instances
+   bool validInput = true;
    bool hexToDecExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
@@ -105,23 +111,32 @@ void hexToDec() {
       // validate input string
       for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
          if ((*rit >= '0' && *rit <= '9') || (*rit >= 'A' && *rit <= 'F')) {
-            cout << "good" << endl;
+            hexVec.push_back(*rit);
          }
          else if (*rit == 'X') { // cases where 0x was added front of hexdecimal number, just parses it off
-            cout << "X found" << endl;
             break;
          }
          else {
             cerr << "Invalid input: hexdecimal is 0-9 and A-F" << endl;
+            validInput = false;
+            hexVec.clear();
             cin.clear();
             break;
          }
       }
-      cout << inputCheck << endl;
+
+      if (validInput != true){
+         continue;
+      }
+      else{
+         cout << "Valid input" << endl;
+      }
    } while (hexToDecExit != true);
 }
 
 void binToDec() {
+   vector<char> binVec; // maybe change to dynamic to allow mutiple instances
+   bool validInput = true;
    bool binToDecExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
@@ -142,13 +157,21 @@ void binToDec() {
       // validate input string
       for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
          if (*rit == '1' || *rit == '0') {
-            cout << "good" << endl;
+            binVec.push_back(*rit);
          }
          else {
             cerr << "Invalid input: binary is 0 or 1 only" << endl;
+            validInput = false;
+            binVec.clear();
             cin.clear();
-
          }
+      }
+
+      if(validInput != true){
+         continue;
+      }
+      else{
+         cout << "input is good" << endl;
       }
 
    } while (binToDecExit != true);
