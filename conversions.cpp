@@ -21,8 +21,8 @@ int main() {
    // forward declaration of converstion methods:
    void hexToDec();
    void binToDec();
-   void decToHex();
-   void decToBin();
+   // void decToHex(); implement later
+   // void decToBin(); implement later
 
    // variable declarations:
    // 
@@ -44,8 +44,8 @@ int main() {
       // Display options
       cout << "1. Hexadecimal to Decimal Conversion" << endl;
       cout << "2. Binary to Decimal Conversion" << endl;
-      cout << "3. Decimal to Hexadecimal Conversion" << endl;
-      cout << "4. Decimal to Binary Conversion" << endl;
+      cout << "3. Decimal to Hexadecimal Conversion (not supported currently)" << endl;
+      cout << "4. Decimal to Binary Conversion (not supported currently)" << endl;
       cout << "5. Quit" << endl;
       cout << "Input number of option you wish to use : ";
       getline(cin, input);
@@ -73,11 +73,15 @@ int main() {
             binToDec();
             break;
          case '3': // Decimal to Hexadecimal
-            decToHex();
-            break;
+            //decToHex();
+            //break;
+            cout << "Dec to Hex not supported at this time\n" << endl;
+            continue;
          case '4': // Decimal to Binary
-            decToBin();
-            break;
+            //decToBin();
+            //break;
+            cout << "Dec to Bin not supported at this time\n" << endl;
+            continue;
          case '5': // exit case
             mainExit = true;
             break;
@@ -170,8 +174,15 @@ void binToDec() {
    bool binToDecExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
+   int total = 0;
+   int overflowCheck = 0;
 
    do {
+      // reset variables to allow multiple loops
+      validInput = true; // needed to reset flag to prevent forever false being set
+      total = 0; // reset total
+      overflowCheck = 0;
+      binVec.clear(); // clear
       cout << "\n" << "input Binary number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
 
@@ -201,11 +212,22 @@ void binToDec() {
          continue;
       }
       else{
-         cout << "input is good" << endl;
+         for (int i = 0; i < binVec.size(); i++){
+            total += (binVec[i] - '0') * pow(2,i);
+         }
       }
+
+      if (total < 0){ //Overflow handler
+         cerr << "Overflow error max 32-bit signed binary int exceeded" << endl;
+         continue;
+      }
+
+      cout << total << endl;
 
    } while (binToDecExit != true);
 }
+
+/* due to time constraints and money constraints these methods will be implemented at a later date
 
 void decToHex() {
    // variable declarations
@@ -250,3 +272,4 @@ void decToBin() {
       cout << inputCheck << endl;
    } while (decToBinExit != true);
 }
+*/
