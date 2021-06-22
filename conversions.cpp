@@ -10,6 +10,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <math.h>
+
+// index table for hex values
+const int HEX_INTS[6] = {10, 11, 12, 13, 14, 15}; // bad practice: suggest passing as argument
 
 using namespace std;
 int main() {
@@ -34,8 +38,7 @@ int main() {
    string input = ""; // holds input from user
    bool mainExit = false; // flag for ending the program
 
-   // index table for hex values
-   int hexInts[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+   
 
    do {
       // Display options
@@ -94,8 +97,14 @@ void hexToDec() {
    bool hexToDecExit = false; // exit flag
    string exitString = "EXIT";
    string inputCheck = "";
+   int total = 0;
 
    do {
+      // reset variables to allow multiple loops
+      validInput = true; // needed to reset flag to prevent forever false being set
+      total = 0; // reset total
+      hexVec.clear(); // clear
+
       cout << "\n" << "input Hexadecimal number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
 
@@ -116,7 +125,7 @@ void hexToDec() {
          else if (*rit == 'X') { // cases where 0x was added front of hexdecimal number, just parses it off
             break;
          }
-         else {
+         else { // error message, clear vector, clear input, set flag to false
             cerr << "Invalid input: hexdecimal is 0-9 and A-F" << endl;
             validInput = false;
             hexVec.clear();
@@ -128,8 +137,16 @@ void hexToDec() {
       if (validInput != true){
          continue;
       }
-      else{
-         cout << "Valid input" << endl;
+      else{ //here only 0-9 and A-F is possible
+         for (int i = 0; i < hexVec.size(); i++){
+            if (hexVec[i] >= 48 && hexVec[i] <= 57){
+               total += ((int)hexVec[i] - '0') * pow(16, i);
+            }
+            else{
+               total += HEX_INTS[hexVec[i] - 'A'] * pow(16, i);
+            }
+         }
+         cout << total << endl;
       }
    } while (hexToDecExit != true);
 }
@@ -159,7 +176,7 @@ void binToDec() {
          if (*rit == '1' || *rit == '0') {
             binVec.push_back(*rit);
          }
-         else {
+         else { // clear vector, clear input, set flag, error message
             cerr << "Invalid input: binary is 0 or 1 only" << endl;
             validInput = false;
             binVec.clear();
@@ -167,7 +184,7 @@ void binToDec() {
          }
       }
 
-      if(validInput != true){
+      if(validInput != true){ // reset 
          continue;
       }
       else{
