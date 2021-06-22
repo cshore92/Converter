@@ -98,15 +98,22 @@ void hexToDec() {
    string exitString = "EXIT";
    string inputCheck = "";
    int total = 0;
+   int overflowCheck = 0;
 
    do {
       // reset variables to allow multiple loops
       validInput = true; // needed to reset flag to prevent forever false being set
       total = 0; // reset total
+      overflowCheck = 0;
       hexVec.clear(); // clear
 
-      cout << "\n" << "input Hexadecimal number or \"EXIT\" to return to main menu: ";
+      cout << "\n" << "input 8 digit Hexadecimal number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
+
+      if (inputCheck.length() > 8){
+         cerr << "8 bits (a byte) hexadecimal number supported" << endl;
+         continue;
+      }
 
       // force uppercase for easier string parsing
       for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
@@ -121,6 +128,7 @@ void hexToDec() {
       for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
          if ((*rit >= '0' && *rit <= '9') || (*rit >= 'A' && *rit <= 'F')) {
             hexVec.push_back(*rit);
+            overflowCheck += (int)*rit;
          }
          else if (*rit == 'X') { // cases where 0x was added front of hexdecimal number, just parses it off
             break;
@@ -145,6 +153,11 @@ void hexToDec() {
             else{
                total += HEX_INTS[hexVec[i] - 'A'] * pow(16, i);
             }
+         }
+         
+         if(total < 0){ // best solution I could come up with (research better solutions)
+            cerr << "Overflow Error max 32 bit signed binary int is 7FFFFFFF" << endl;
+            continue;
          }
          cout << total << endl;
       }
