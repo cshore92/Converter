@@ -6,16 +6,31 @@
 // This program is a CLI based reprensentation of a conversion calculator being
 // able to convert between hex, dec, and binary numbers.
 // This also serves as a model for GUI based calculator.
+//
+// Features:
+//    Conversion between decimal, hexadecimal, and binary numbers.
+//    String parsing and string manipulation to ensure correct input and correct output of 
+//    numbers, and characters.
+//    Error handling and checking to ensure program runs without fault or failure
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <math.h>
+using namespace std;
 
 // index table for hex values
 const int HEX_INTS[6] = {10, 11, 12, 13, 14, 15}; // bad practice: suggest passing as argument
 
-using namespace std;
+// index table for bin value - bad practice suggest passing as argument
+const string BIN_STR[16] = {"0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", 
+                            "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"};
+
+// Main method of the program, displays options for the user to choose.
+// input is validated to ensure proper functioning of the program
+// Only digits allowed in the main function
+// only one argument allowed at time of development - subject to changed
+// @return 0 on normal exit, otherwise specific error code is returned.
 int main() {
    // Since this program is trivial forward declaration is fine
    // forward declaration of converstion methods:
@@ -23,17 +38,19 @@ int main() {
    void binToDec();
    // void decToHex(); implement later
    // void decToBin(); implement later
+   void hexToBin();
 
    // variable declarations:
-   // 
-   // number of options can update if options added
-   const char MAX_NUM_CHOICES = '5';
 
    // lower number of the choices can update if changes are made
    const char MIN_NUM_CHOICES = '1';
 
    // number of arguments needed for method to work properly
    const char MIN_NUM_ARGS = '1';
+
+   // Number needed to exit the method NEEDS TO BE LARGEST NUMBER
+   // PROGRAM USES THIS NUMBER AS UPPER BOUNDS CHECKING
+   const int EXIT_NUM = 6;
 
    string input = ""; // holds input from user
    bool mainExit = false; // flag for ending the program
@@ -46,7 +63,8 @@ int main() {
       cout << "2. Binary to Decimal Conversion" << endl;
       cout << "3. Decimal to Hexadecimal Conversion (not supported currently)" << endl;
       cout << "4. Decimal to Binary Conversion (not supported currently)" << endl;
-      cout << "5. Quit" << endl;
+      cout << "5. Hexadecimal to Binary Conversion" << endl;
+      cout << EXIT_NUM << ". Quit" << endl;
       cout << "Input number of option you wish to use : ";
       getline(cin, input);
 
@@ -60,11 +78,12 @@ int main() {
          cerr << "Input is not a digit \n" << endl;
          cin.clear();
       }
-      else if (input[0] < MIN_NUM_CHOICES || input[0] > MAX_NUM_CHOICES) { //Bounds check
+      else if (input[0] < MIN_NUM_CHOICES || input[0] - '0' > EXIT_NUM) { //Bounds check
          cerr << "Input is out of bounds for the list \n" << endl;
          cin.clear();
       }
       else {
+         const char exitNum = (char)EXIT_NUM + '0'; // create exit case
          switch (input[0]) {
          case '1': // Hexadecimal to Decimal
             hexToDec();
@@ -82,7 +101,10 @@ int main() {
             //break;
             cout << "Dec to Bin not supported at this time\n" << endl;
             continue;
-         case '5': // exit case
+         case '5': // Hexadecimal to Binary
+            hexToBin();
+            break;
+         case exitNum: // exit case
             mainExit = true;
             break;
          default: // added security
@@ -94,6 +116,13 @@ int main() {
    return 0;
 }
 
+// Conversts hexadecimal number to it's 32 bit int decimal eqivalent in a loop until exited
+// String input is verified before proceeding
+// Only hexadecimal digits accepted 0-9, A-F - Exit case checked first
+// Automatically capitalizes input so any valid letter will be converted includes exit case
+// upper bound of 8 digits (a byte), due to how easy it is to overflow with hexadecimal
+// Overflow handler - based on 32 bit int.
+// @return nothing - results printed to console
 void hexToDec() {
    //variable declarations
    vector<char> hexVec; // maybe change to dynamic to allow mutiple instances
@@ -102,19 +131,22 @@ void hexToDec() {
    string exitString = "EXIT";
    string inputCheck = "";
    int total = 0;
-   int overflowCheck = 0;
 
    do {
       // reset variables to allow multiple loops
       validInput = true; // needed to reset flag to prevent forever false being set
       total = 0; // reset total
-      overflowCheck = 0;
       hexVec.clear(); // clear
 
       cout << "\n" << "input 8 digit Hexadecimal number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
 
-      if (inputCheck.length() > 8){
+      if (inputCheck.length() < 1){ // check empty string
+         cerr << "no input detected" << endl;
+         continue;
+      }
+
+      if (inputCheck.length() > 8){ // Due to how easy it is to overflow, just limiting numbers
          cerr << "8 bits (a byte) hexadecimal number supported" << endl;
          continue;
       }
@@ -132,7 +164,6 @@ void hexToDec() {
       for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
          if ((*rit >= '0' && *rit <= '9') || (*rit >= 'A' && *rit <= 'F')) {
             hexVec.push_back(*rit);
-            overflowCheck += (int)*rit;
          }
          else if (*rit == 'X') { // cases where 0x was added front of hexdecimal number, just parses it off
             break;
@@ -168,6 +199,12 @@ void hexToDec() {
    } while (hexToDecExit != true);
 }
 
+// Conversts binary number to it's 32 bit int decimal eqivalent in a loop until exited
+// String input is verified before proceeding
+// Only Binary digits accepted 1's and 0's - Exit case checked first
+// Automatically capitalizes input so any valid letter will be converted includes exit case
+// Overflow handler - based on 32 bit int.
+// @return nothing - results printed to console
 void binToDec() {
    vector<char> binVec; // maybe change to dynamic to allow mutiple instances
    bool validInput = true;
@@ -175,16 +212,19 @@ void binToDec() {
    string exitString = "EXIT";
    string inputCheck = "";
    int total = 0;
-   int overflowCheck = 0;
 
    do {
       // reset variables to allow multiple loops
       validInput = true; // needed to reset flag to prevent forever false being set
       total = 0; // reset total
-      overflowCheck = 0;
       binVec.clear(); // clear
       cout << "\n" << "input Binary number or \"EXIT\" to return to main menu: ";
       getline(cin, inputCheck);
+
+      if (inputCheck.length() < 1){ // check empty string
+         cerr << "no input detected" << endl;
+         continue;
+      }
 
       // force uppercase for easier string parsing
       for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
@@ -208,10 +248,10 @@ void binToDec() {
          }
       }
 
-      if(validInput != true){ // reset 
+      if(validInput != true){  // check valid input
          continue;
       }
-      else{
+      else{ // input is valid, convert to dec using power of 2
          for (int i = 0; i < binVec.size(); i++){
             total += (binVec[i] - '0') * pow(2,i);
          }
@@ -225,6 +265,99 @@ void binToDec() {
       cout << total << endl;
 
    } while (binToDecExit != true);
+}
+
+// Converts hexadecimal number to a binary number representation in a do while loop until exit
+// String input is verified before proceeding
+// Only Hexadecimal digits accepted: 0-9 and A-F
+// Automatically capitalizes input so any valid letter will be converted includes exit case
+// leading 0's are removed
+// upper bound of 8 characters
+// @return nothing - results printed to console
+void hexToBin(){
+   //variable declarations
+   vector<char> hexVec; // maybe change to dynamic to allow mutiple instances
+   bool validInput = true;
+   bool hexToBinExit = false; // exit flag
+   string exitString = "EXIT";
+   string inputCheck = "";
+   string total = "";
+
+   do {
+      // reset variables to allow multiple loops
+      validInput = true; // needed to reset flag to prevent forever false being set
+      total = ""; // reset total
+      hexVec.clear(); // clear
+
+      cout << "\n" << "input 8 digit Hexadecimal number or \"EXIT\" to return to main menu: ";
+      getline(cin, inputCheck);
+
+      if (inputCheck.length() < 1){ // check empty string
+         cerr << "no input detected" << endl;
+         continue;
+      }
+
+      if (inputCheck.length() > 8){ // probably not needed, but keeping it for consistency 
+         cerr << "8 bits (a byte) hexadecimal number supported" << endl;
+         continue;
+      }
+
+      // force uppercase for easier string parsing
+      for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
+         inputCheck[i] = toupper(inputCheck[i]);      // way to do this but it works
+      }
+
+      if (inputCheck.compare(exitString) == 0) { // check exit case
+         return;
+      }
+
+      // validate input string
+      for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
+         if ((*rit >= '0' && *rit <= '9') || (*rit >= 'A' && *rit <= 'F')) {
+            hexVec.push_back(*rit);
+         }
+         else if (*rit == 'X') { // cases where 0x was added front of hexdecimal number, just parses it off
+            break;
+         }
+         else { // error message, clear vector, clear input, set flag to false
+            cerr << "Invalid input: hexdecimal is 0-9 and A-F" << endl;
+            validInput = false;
+            hexVec.clear();
+            cin.clear();
+            break;
+         }
+      }
+
+      if (validInput != true){
+         continue;
+      }
+      else{ //here only 0-9 and A-F is possible
+         for (int i = hexVec.size()-1; i >= 0; i--){
+            if (hexVec[i] >= 48 && hexVec[i] <= 57){
+               total += BIN_STR[hexVec[i] - '0']; // 0-9 indexes
+            }
+            else{
+               total += BIN_STR[hexVec[i] - '7']; // make this eqaul to 10-15
+            }
+         }
+         
+         /* hard bouned by 8 digits so this shouldn't be an issue, gonna leave in just in case
+            I change my mind in the future - honestly not sure if overflow is a concern
+
+         if(total < 0){ // best solution I could come up with (research better solutions)
+            cerr << "Overflow Error max 32 bit signed binary int is 7FFFFFFF" << endl;
+            continue;
+         } */
+
+         string::iterator it = total.begin();
+         while(*it != '1' && it != total.end()-1){
+            total.erase(it);
+         }
+                 
+         cout << total << endl;
+         
+      }
+   } while (hexToBinExit != true);
 }
 
 /* due to time constraints and money constraints these methods will be implemented at a later date
