@@ -16,11 +16,15 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stack>
 #include <math.h>
 using namespace std;
 
 // index table for hex values
 const int HEX_INTS[6] = {10, 11, 12, 13, 14, 15}; // bad practice: suggest passing as argument
+
+// index table for hex characters
+const char HEX_CHARS[6] = {'A', 'B', 'C', 'D', 'E', 'F'}; // bad practice
 
 // index table for bin value - bad practice suggest passing as argument
 const string BIN_STR[16] = {"0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", 
@@ -32,13 +36,16 @@ const string BIN_STR[16] = {"0000", "0001", "0010", "0011", "0100", "0101", "011
 // only one argument allowed at time of development - subject to changed
 // @return 0 on normal exit, otherwise specific error code is returned.
 int main() {
-   // Since this program is trivial forward declaration is fine
-   // forward declaration of converstion methods:
+   // Since this program is trivial forward declaration is fine - I should have used header file
+   // really regretting not using a header, cpp and main file.... this is messy
+   // forward declaration of conversion methods:
    void hexToDec();
    void binToDec();
    // void decToHex(); implement later
    // void decToBin(); implement later
    void hexToBin();
+   void binToHex();
+   char getHexChar(stack<char>);
 
    // variable declarations:
 
@@ -50,7 +57,7 @@ int main() {
 
    // Number needed to exit the method NEEDS TO BE LARGEST NUMBER
    // PROGRAM USES THIS NUMBER AS UPPER BOUNDS CHECKING
-   const int EXIT_NUM = 6;
+   const int EXIT_NUM = 7;
 
    string input = ""; // holds input from user
    bool mainExit = false; // flag for ending the program
@@ -64,6 +71,7 @@ int main() {
       cout << "3. Decimal to Hexadecimal Conversion (not supported currently)" << endl;
       cout << "4. Decimal to Binary Conversion (not supported currently)" << endl;
       cout << "5. Hexadecimal to Binary Conversion" << endl;
+      cout << "6. Binary to Hexadecimal Conversion" << endl;
       cout << EXIT_NUM << ". Quit" << endl;
       cout << "Input number of option you wish to use : ";
       getline(cin, input);
@@ -104,6 +112,9 @@ int main() {
          case '5': // Hexadecimal to Binary
             hexToBin();
             break;
+         case '6':
+            binToHex();
+            break;
          case exitNum: // exit case
             mainExit = true;
             break;
@@ -114,6 +125,27 @@ int main() {
       }
    } while (mainExit != true);
    return 0;
+} // end main
+
+// here are definitions of the methods, I should have put them in cpp, but I though this would 
+// be simpler, turns out I'm wrong. Might change in the future.
+
+char getHexChar(stack<char> binStack){
+   int total = 0;
+   char returnChar = ' ';
+   for (int i = 0; i < 4; i++){
+      if (binStack.top() == '1'){
+         total += pow(2, i);
+      }
+      binStack.pop();
+   }
+   if (total > 9){
+      returnChar = HEX_CHARS[total - 10];
+   }
+   else{
+      returnChar = total + '0';
+   }
+   return returnChar;
 }
 
 // Conversts hexadecimal number to it's 32 bit int decimal eqivalent in a loop until exited
@@ -197,7 +229,7 @@ void hexToDec() {
          cout << total << endl;
       }
    } while (hexToDecExit != true);
-}
+} // end hexToDec
 
 // Conversts binary number to it's 32 bit int decimal eqivalent in a loop until exited
 // String input is verified before proceeding
@@ -265,7 +297,7 @@ void binToDec() {
       cout << total << endl;
 
    } while (binToDecExit != true);
-}
+} // end binToDec
 
 // Converts hexadecimal number to a binary number representation in a do while loop until exit
 // String input is verified before proceeding
@@ -358,7 +390,89 @@ void hexToBin(){
          
       }
    } while (hexToBinExit != true);
-}
+} // end hexToBin
+
+// Conversts binary number to it's 32 bit int decimal eqivalent in a loop until exited
+// String input is verified before proceeding
+// Only Binary digits accepted 1's and 0's - Exit case checked first
+// Automatically capitalizes input so any valid letter will be converted includes exit case
+// Overflow handler - based on 32 bit int.
+// @return nothing - results printed to console
+void binToHex(){
+   vector<char> binVec; // maybe change to dynamic to allow mutiple instances
+   bool validInput = true;
+   bool binToHexExit = false; // exit flag
+   string exitString = "EXIT";
+   string inputCheck = "";
+   stack<char> binStack; // practice with stacks
+   string total = "";
+
+   do {
+      // reset variables to allow multiple loops
+      validInput = true; // needed to reset flag to prevent forever false being set
+      total = ""; // reset total
+      binVec.clear(); // clear
+      cout << "\n" << "input Binary number or \"EXIT\" to return to main menu: ";
+      getline(cin, inputCheck);
+
+      if (inputCheck.length() < 1){ // check empty string
+         cerr << "no input detected" << endl;
+         continue;
+      }
+
+      // force uppercase for easier string parsing
+      for (int i = 0; i < inputCheck.length(); i++) { // probably a more effiecient 
+         inputCheck[i] = toupper(inputCheck[i]);      // way to do this but it works
+      }
+
+      if (inputCheck.compare(exitString) == 0) { // check exit case
+         return;
+      }
+
+      // adds leading zeros to ensure 4 bit nibbles are satisfied.
+      while(inputCheck.length() % 4 != 0){
+         inputCheck.insert(0, "0");
+      }
+
+      // validate input string
+      for (string::reverse_iterator rit = inputCheck.rbegin(); rit != inputCheck.rend(); rit++) { // iterator practice
+         if (*rit == '1' || *rit == '0') {
+            binVec.push_back(*rit);
+         }
+         else { // clear vector, clear input, set flag, error message
+            cerr << "Invalid input: binary is 0 or 1 only" << endl;
+            validInput = false;
+            binVec.clear();
+            cin.clear();
+         }
+      }
+
+      if(validInput != true){  // check valid input
+         continue;
+      }
+      else{ // input is valid, get 4 bit nibbles, math to HEX_CHARS, then concat chars.
+         for (int i = binVec.size() - 1; i >= 0; i--){
+            binStack.push(binVec[i]);
+            if (binStack.size() == 4){
+               total += getHexChar(binStack);
+               while (!binStack.empty()){
+                  binStack.pop();
+               }
+            }
+         }
+      }
+
+      /* I don't think this is needed - leaving in just in case
+      if (total < 0){ //Overflow handler
+         cerr << "Overflow error max 32-bit signed binary int exceeded" << endl;
+         continue;
+      }*/
+
+      cout << total << endl;
+
+   } while (binToHexExit != true);
+
+}// end binToHex
 
 /* due to time constraints and money constraints these methods will be implemented at a later date
 
