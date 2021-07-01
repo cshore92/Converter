@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>GitHub-Mark-Light-32px.png</file>
+    </qresource>
+</RCC>
